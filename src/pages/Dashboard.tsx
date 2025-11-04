@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
-import {LogOut, Plus, TrendingUp, Wallet, Calendar } from 'lucide-react';
+import { LogOut, Plus, TrendingUp, Wallet, Calendar, User } from 'lucide-react';
 
 type Investment = any;
 type Payout = any;
@@ -91,6 +91,10 @@ export default function Dashboard() {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="text-2xl font-bold text-primary">Trini4ex</div>
           <div className="flex items-center gap-4">
+            <Button variant="ghost" onClick={() => navigate('/account')}>
+              <User className="w-4 h-4 mr-2" />
+              Account
+            </Button>
             <Button variant="outline" onClick={signOut}>
               <LogOut className="w-4 h-4 mr-2" />
               Sign Out
