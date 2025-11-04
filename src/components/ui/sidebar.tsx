@@ -2,6 +2,8 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { VariantProps, cva } from "class-variance-authority";
 import { PanelLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -9,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state";
@@ -397,13 +398,24 @@ SidebarGroupAction.displayName = "SidebarGroupAction";
 const SidebarGroupContent = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
   ({ className, ...props }, ref) => (
     <div ref={ref} data-sidebar="group-content" className={cn("w-full text-sm", className)} {...props} />
-  ),
+  )
 );
 SidebarGroupContent.displayName = "SidebarGroupContent";
 
-const SidebarMenu = React.forwardRef<HTMLUListElement, React.ComponentProps<"ul">>(({ className, ...props }, ref) => (
-  <ul ref={ref} data-sidebar="menu" className={cn("flex w-full min-w-0 flex-col gap-1", className)} {...props} />
-));
+const SidebarMenu = React.forwardRef<HTMLUListElement, React.ComponentProps<"ul">>(({ className, ...props }, ref) => {
+  const navigate = useNavigate();
+
+  return (
+    <ul ref={ref} data-sidebar="menu" className={cn("flex w-full min-w-0 flex-col gap-1", className)} {...props}>
+      <SidebarMenuItem>
+        <SidebarMenuButton onClick={() => navigate('/admin/users')}>
+          Users
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      {/* Existing menu items */}
+    </ul>
+  );
+});
 SidebarMenu.displayName = "SidebarMenu";
 
 const SidebarMenuItem = React.forwardRef<HTMLLIElement, React.ComponentProps<"li">>(({ className, ...props }, ref) => (
@@ -474,13 +486,10 @@ const SidebarMenuButton = React.forwardRef<
 });
 SidebarMenuButton.displayName = "SidebarMenuButton";
 
-const SidebarMenuAction = React.forwardRef<
-  HTMLButtonElement,
-  React.ComponentProps<"button"> & {
-    asChild?: boolean;
-    showOnHover?: boolean;
-  }
->(({ className, asChild = false, showOnHover = false, ...props }, ref) => {
+const SidebarMenuAction = React.forwardRef<HTMLButtonElement, React.ComponentProps<"button"> & {
+  asChild?: boolean;
+  showOnHover?: boolean;
+}>(({ className, asChild = false, showOnHover = false, ...props }, ref) => {
   const Comp = asChild ? Slot : "button";
 
   return (
@@ -489,7 +498,6 @@ const SidebarMenuAction = React.forwardRef<
       data-sidebar="menu-action"
       className={cn(
         "absolute right-1 top-1.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-none ring-sidebar-ring transition-transform peer-hover/menu-button:text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
-        // Increases the hit area of the button on mobile.
         "after:absolute after:-inset-2 after:md:hidden",
         "peer-data-[size=sm]/menu-button:top-1",
         "peer-data-[size=default]/menu-button:top-1.5",
@@ -497,7 +505,7 @@ const SidebarMenuAction = React.forwardRef<
         "group-data-[collapsible=icon]:hidden",
         showOnHover &&
           "group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground md:opacity-0",
-        className,
+        className
       )}
       {...props}
     />
@@ -536,6 +544,7 @@ const SidebarMenuSkeleton = React.forwardRef<
     return `${Math.floor(Math.random() * 40) + 50}%`;
   }, []);
 
+  // Ensure proper closure of JSX in SidebarMenuSkeleton
   return (
     <div
       ref={ref}
@@ -547,11 +556,7 @@ const SidebarMenuSkeleton = React.forwardRef<
       <Skeleton
         className="h-4 max-w-[--skeleton-width] flex-1"
         data-sidebar="menu-skeleton-text"
-        style={
-          {
-            "--skeleton-width": width,
-          } as React.CSSProperties
-        }
+        style={{ "--skeleton-width": width } as React.CSSProperties}
       />
     </div>
   );
@@ -574,9 +579,9 @@ const SidebarMenuSub = React.forwardRef<HTMLUListElement, React.ComponentProps<"
 );
 SidebarMenuSub.displayName = "SidebarMenuSub";
 
-const SidebarMenuSubItem = React.forwardRef<HTMLLIElement, React.ComponentProps<"li">>(({ ...props }, ref) => (
-  <li ref={ref} {...props} />
-));
+const SidebarMenuSubItem = React.forwardRef<HTMLLIElement, React.ComponentProps<"li">>((props, ref) => {
+  return <li ref={ref} {...props} />;
+});
 SidebarMenuSubItem.displayName = "SidebarMenuSubItem";
 
 const SidebarMenuSubButton = React.forwardRef<
@@ -586,7 +591,8 @@ const SidebarMenuSubButton = React.forwardRef<
     size?: "sm" | "md";
     isActive?: boolean;
   }
->(({ asChild = false, size = "md", isActive, className, ...props }, ref) => {
+>((props, ref) => {
+  const { asChild = false, size = "md", isActive, className, ...rest } = props;
   const Comp = asChild ? Slot : "a";
 
   return (
@@ -601,9 +607,9 @@ const SidebarMenuSubButton = React.forwardRef<
         size === "sm" && "text-xs",
         size === "md" && "text-sm",
         "group-data-[collapsible=icon]:hidden",
-        className,
+        className
       )}
-      {...props}
+      {...rest}
     />
   );
 });
@@ -612,7 +618,6 @@ SidebarMenuSubButton.displayName = "SidebarMenuSubButton";
 export {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupAction,
   SidebarGroupContent,

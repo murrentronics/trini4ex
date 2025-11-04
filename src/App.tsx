@@ -11,6 +11,7 @@ import CreateInvestment from "./pages/CreateInvestment";
 import Admin from "./pages/Admin";
 import Account from "./pages/Account";
 import NotFound from "./pages/NotFound";
+import Users from "./pages/Users";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/invest" element={<CreateInvestment />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/users" element={<Users />} />
             <Route path="/account" element={<Account />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

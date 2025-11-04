@@ -36,17 +36,6 @@ export default function Admin() {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (!roleLoading && !isAdmin) {
-      toast({
-        title: 'Access Denied',
-        description: 'You do not have admin privileges.',
-        variant: 'destructive',
-      });
-      navigate('/dashboard');
-    }
-  }, [isAdmin, roleLoading, navigate, toast]);
-
-  useEffect(() => {
     if (isAdmin) {
       fetchAdminData();
     }
@@ -92,6 +81,7 @@ export default function Admin() {
   const totalInvested = activeInvestments.reduce((sum, inv) => sum + Number(inv.total_investment_ttd), 0);
   const totalPayouts = payouts.reduce((sum, payout) => sum + Number(payout.net_amount_ttd), 0);
   const activeContracts = activeInvestments.length;
+  const activeInvestors = users.filter((user) => user.investments.some((inv) => inv.status === 'active')).length;
 
   const handleApproveInvestment = async (investmentId: string) => {
     try {
@@ -220,10 +210,16 @@ export default function Admin() {
       <nav className="border-b border-border">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="text-2xl font-bold text-primary">Trini4ex Admin</div>
-          <Button variant="outline" onClick={signOut}>
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => navigate('/admin/users')}>
+              <Users className="w-4 h-4 mr-2" />
+              Users
+            </Button>
+            <Button variant="outline" onClick={signOut}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
         </div>
       </nav>
 
@@ -232,21 +228,21 @@ export default function Admin() {
         <div className="grid md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-              <Users className="w-4 h-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{users.length}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Active Contracts</CardTitle>
               <TrendingUp className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-accent">{activeContracts}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Active Investors</CardTitle>
+              <Users className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-accent">{activeInvestors}</div>
             </CardContent>
           </Card>
 
@@ -270,44 +266,6 @@ export default function Admin() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Users Table */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Users</CardTitle>
-            <CardDescription>Manage all registered users and their investments</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Investments</TableHead>
-                  <TableHead>Total Invested</TableHead>
-                  <TableHead>Joined</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.map((user) => {
-                  const userTotalInvested = user.investments.reduce(
-                    (sum, inv) => sum + Number(inv.total_investment_ttd),
-                    0
-                  );
-                  return (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.full_name || 'N/A'}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>{user.investments.length}</TableCell>
-                      <TableCell className="font-semibold">{userTotalInvested.toFixed(2)} TTD</TableCell>
-                      <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
 
         {/* Investment Tabs */}
         <Card>
