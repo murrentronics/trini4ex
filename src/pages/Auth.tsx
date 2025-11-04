@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/useUserRole';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Auth() {
@@ -17,13 +18,14 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isAdmin, loading: roleLoading } = useUserRole();
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user) {
-      navigate('/dashboard');
+    if (user && !roleLoading) {
+      navigate(isAdmin ? '/admin' : '/dashboard');
     }
-  }, [user, navigate]);
+  }, [user, isAdmin, roleLoading, navigate]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,7 +63,7 @@ export default function Auth() {
           title: 'Welcome back!',
           description: 'Signed in successfully.',
         });
-        navigate('/dashboard');
+        // Navigation handled by useEffect
       }
     } catch (error: any) {
       toast({

@@ -1,17 +1,19 @@
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/useUserRole';
 import { useEffect } from 'react';
 
 export default function Landing() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isAdmin, loading: roleLoading } = useUserRole();
 
   useEffect(() => {
-    if (user) {
-      navigate('/dashboard');
+    if (user && !roleLoading) {
+      navigate(isAdmin ? '/admin' : '/dashboard');
     }
-  }, [user, navigate]);
+  }, [user, isAdmin, roleLoading, navigate]);
 
   return (
     <div className="min-h-screen bg-background">

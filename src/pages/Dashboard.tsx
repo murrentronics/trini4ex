@@ -14,7 +14,7 @@ type Payout = any;
 
 export default function Dashboard() {
   const { user, signOut, loading: authLoading } = useAuth();
-  const { isAdmin } = useUserRole();
+  const { isAdmin, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [investments, setInvestments] = useState<Investment[]>([]);
@@ -26,6 +26,12 @@ export default function Dashboard() {
       navigate('/auth');
     }
   }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    if (!roleLoading && isAdmin) {
+      navigate('/admin');
+    }
+  }, [isAdmin, roleLoading, navigate]);
 
   useEffect(() => {
     if (user) {
@@ -70,7 +76,7 @@ export default function Dashboard() {
   const totalPayouts = payouts.reduce((sum, payout) => sum + Number(payout.net_amount_ttd), 0);
   const activeContracts = investments.filter(inv => inv.status === 'active').length;
 
-  if (authLoading || loading) {
+  if (authLoading || roleLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-primary">Loading...</div>
@@ -85,11 +91,6 @@ export default function Dashboard() {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="text-2xl font-bold text-primary">Trini4ex</div>
           <div className="flex items-center gap-4">
-            {isAdmin && (
-              <Button variant="outline" onClick={() => navigate('/admin')}>
-                Admin Dashboard
-              </Button>
-            )}
             <Button variant="outline" onClick={signOut}>
               <LogOut className="w-4 h-4 mr-2" />
               Sign Out
