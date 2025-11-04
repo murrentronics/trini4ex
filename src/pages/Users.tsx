@@ -1,13 +1,16 @@
+import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 
 type Profile = any;
 
 export default function UsersPage() {
   const [users, setUsers] = useState<Profile[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchUsers() {
@@ -25,12 +28,38 @@ export default function UsersPage() {
 
         if (investmentsError) throw investmentsError;
 
-        const usersWithInvestments = profiles.map((profile) => {
-          const userInvestments = investments.filter((inv) => inv.user_id === profile.id);
-          return { ...profile, investments: userInvestments };
+        const { data: payouts, error: payoutsError } = await supabase
+          .from('payouts')
+          .select('user_id, net_amount_ttd');
+
+        if (payoutsError) throw payoutsError;
+
+        const { data: adminRoles, error: adminRolesError } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .eq('role', 'admin');
+
+        if (adminRolesError) throw adminRolesError;
+
+        const adminUserIds = adminRoles.map((role) => role.user_id);
+
+        const totalPayoutsByUser = payouts.reduce((acc, payout) => {
+          acc[payout.user_id] = (acc[payout.user_id] || 0) + Number(payout.net_amount_ttd);
+          return acc;
+        }, {});
+
+        const usersWithInvestments = profiles
+          .filter((profile) => !adminUserIds.includes(profile.id)) // Exclude admin users
+          .map((profile) => {
+            const userInvestments = investments.filter((inv) => inv.user_id === profile.id);
+            return { ...profile, investments: userInvestments };
+          });
+
+        const usersWithInvestmentsAndPayouts = usersWithInvestments.map((user) => {
+          return { ...user, total_payouts: totalPayoutsByUser[user.id] || 0 };
         });
 
-        setUsers(usersWithInvestments);
+        setUsers(usersWithInvestmentsAndPayouts);
       } catch (error: any) {
         console.error('Error fetching users:', error.message);
       }
@@ -41,6 +70,11 @@ export default function UsersPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-end mb-4">
+        <Button variant="outline" onClick={() => navigate('/dashboard')}>
+          Back to Dashboard
+        </Button>
+      </div>
       <Card className="mb-8">
         <CardHeader>
           <CardTitle>Users</CardTitle>
@@ -54,6 +88,7 @@ export default function UsersPage() {
                 <TableHead>Email</TableHead>
                 <TableHead>Investments</TableHead>
                 <TableHead>Total Invested</TableHead>
+                <TableHead>Total Payouts</TableHead>
                 <TableHead>Joined</TableHead>
               </TableRow>
             </TableHeader>
@@ -72,13 +107,14 @@ export default function UsersPage() {
                       <TableCell>{user.email}</TableCell>
                       <TableCell>{user.investments ? user.investments.length : 0}</TableCell>
                       <TableCell className="font-semibold">{userTotalInvested.toFixed(2)} TTD</TableCell>
+                      <TableCell className="font-semibold">{user.total_payouts.toFixed(2)} TTD</TableCell>
                       <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
                     </TableRow>
                   );
                 })
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center">
+                  <TableCell colSpan={6} className="text-center">
                     No users found.
                   </TableCell>
                 </TableRow>
