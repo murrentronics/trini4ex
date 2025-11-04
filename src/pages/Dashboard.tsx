@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { LogOut, Plus, TrendingUp, Wallet, Calendar, User } from 'lucide-react';
+import InvestmentDashboard from '@/components/InvestmentDashboard';
 
 type Investment = any;
 type Payout = any;
@@ -233,6 +234,17 @@ export default function Dashboard() {
                 ))}
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Ethereum Investment Dashboard */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Ethereum Investment Dashboard</CardTitle>
+            <CardDescription>Real-time blockchain investment data</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <InvestmentDashboard />
           </CardContent>
         </Card>
       </div>

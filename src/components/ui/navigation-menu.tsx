@@ -2,6 +2,7 @@ import * as React from "react";
 import * as NavigationMenuPrimitive from "@radix-ui/react-navigation-menu";
 import { cva } from "class-variance-authority";
 import { ChevronDown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import { cn } from "@/lib/utils";
 
@@ -107,6 +108,28 @@ const NavigationMenuIndicator = React.forwardRef<
 ));
 NavigationMenuIndicator.displayName = NavigationMenuPrimitive.Indicator.displayName;
 
+const WalletButton = () => {
+  const navigate = useNavigate();
+  return (
+    <NavigationMenuItem>
+      <button className={navigationMenuTriggerStyle()} onClick={() => navigate('/wallet')}>
+        Wallet
+      </button>
+    </NavigationMenuItem>
+  );
+};
+
+const AdminRequestsButton = () => {
+  const navigate = useNavigate();
+  return (
+    <NavigationMenuItem>
+      <button className={navigationMenuTriggerStyle()} onClick={() => navigate('/admin-requests')}>
+        Admin Requests
+      </button>
+    </NavigationMenuItem>
+  );
+};
+
 export {
   navigationMenuTriggerStyle,
   NavigationMenu,
@@ -117,4 +140,6 @@ export {
   NavigationMenuLink,
   NavigationMenuIndicator,
   NavigationMenuViewport,
+  WalletButton,
+  AdminRequestsButton,
 };
