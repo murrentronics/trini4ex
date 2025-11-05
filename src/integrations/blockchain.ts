@@ -1,14 +1,16 @@
 import { BrowserProvider, JsonRpcProvider, Contract } from 'ethers';
 
-// Configure the provider (using Alchemy as an example)
-const ALCHEMY_API_KEY = process.env.VITE_ALCHEMY_API_KEY;
-const provider = new JsonRpcProvider(`https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_API_KEY}`);
+// Configure the provider with your Alchemy API key
+const ALCHEMY_API_KEY = 'T2ak8lbff5pJ3fbkzKQUV'; // Your API key
+const ALCHEMY_URL = `https://eth-mainnet.alchemy.com/v2/${ALCHEMY_API_KEY}`;
+
+const provider = new JsonRpcProvider(ALCHEMY_URL);
 
 // Correct usage of BrowserProvider for wallet connection
 const web3Provider = new BrowserProvider(window.ethereum);
 
 // Function to fetch user-specific data from the blockchain
-export async function fetchUserInvestmentData(walletAddress: string, contractAddress: string, abi: any) {
+export async function fetchUserInvestmentData(walletAddress, contractAddress, abi) {
   try {
     const contract = new Contract(contractAddress, abi, provider);
 
